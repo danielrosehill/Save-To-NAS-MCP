@@ -1,0 +1,24 @@
+{
+  "name": "save-to-nas-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for saving files and folders to a local Synology NAS over NFS",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "save-to-nas-mcp": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "nas",
+    "synology",
+    "nfs"
+  ],
+  "author": "Daniel Rosehill",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}
