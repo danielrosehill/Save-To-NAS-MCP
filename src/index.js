@@ -6,19 +6,19 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { execSync, exec } from "child_process";
+import { exec } from "child_process";
 import { promisify } from "util";
 import * as fs from "fs";
 import * as path from "path";
 
 const execAsync = promisify(exec);
 
-// NAS Configuration - embedded so users don't need to specify each time
+// NAS Configuration - configurable via environment variables
 const NAS_CONFIG = {
-  ip: "10.0.0.50",
+  ip: process.env.NAS_IP || "10.0.0.50",
   protocol: "nfs",
-  localMountBase: "/mnt/nas",
-  volumePrefix: "/volume1",
+  localMountBase: process.env.NAS_MOUNT_BASE || "/mnt/nas",
+  volumePrefix: process.env.NAS_VOLUME_PREFIX || "/volume1",
 };
 
 /**
@@ -30,10 +30,11 @@ async function discoverNfsExports() {
     const lines = stdout.trim().split("\n").slice(1); // Skip header line
 
     return lines.map((line) => {
-      const match = line.match(/^(\/volume1\/[^\s]+)/);
+      const regex = new RegExp(`^(${NAS_CONFIG.volumePrefix}/[^\\s]+)`);
+      const match = line.match(regex);
       if (match) {
         const fullPath = match[1];
-        const shareName = fullPath.replace("/volume1/", "");
+        const shareName = fullPath.replace(`${NAS_CONFIG.volumePrefix}/`, "");
         return {
           exportPath: fullPath,
           shareName: shareName,
@@ -58,12 +59,14 @@ async function getMountedShares() {
 
     for (const line of stdout.trim().split("\n")) {
       if (!line) continue;
-      // Parse: 10.0.0.50:/volume1/ShareName on /mnt/nas/LocalName type nfs ...
-      const match = line.match(/^10\.0\.0\.50:(\/volume1\/[^\s]+)\s+on\s+([^\s]+)/);
+      // Parse: <NAS_IP>:/volume1/ShareName on /mnt/nas/LocalName type nfs ...
+      const escapedIp = NAS_CONFIG.ip.replace(/\./g, "\\.");
+      const regex = new RegExp(`^${escapedIp}:(${NAS_CONFIG.volumePrefix}/[^\\s]+)\\s+on\\s+([^\\s]+)`);
+      const match = line.match(regex);
       if (match) {
         const exportPath = match[1];
         const localPath = match[2];
-        const shareName = exportPath.replace("/volume1/", "");
+        const shareName = exportPath.replace(`${NAS_CONFIG.volumePrefix}/`, "");
         mounts[shareName] = {
           exportPath,
           localPath,
