@@ -1,6 +1,6 @@
 {
   "name": "save-to-nas-mcp",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "MCP server for saving files and folders to a local NAS over NFS",
   "type": "module",
   "main": "src/index.js",
@@ -30,7 +30,8 @@
   },
   "homepage": "https://github.com/danielrosehill/Save-To-NAS-MCP#readme",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0"
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.0"
   },
   "engines": {
     "node": ">=18.0.0"

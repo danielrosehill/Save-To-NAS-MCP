@@ -4,14 +4,6 @@ An MCP server for saving files and folders to a local NAS over NFS. Eliminates r
 
 ## Installation
 
-### Via mcpm (recommended)
-
-```bash
-mcpm install save-to-nas-mcp
-mcpm edit save-to-nas --env "NAS_IP=192.168.1.100"
-mcpm add save-to-nas --profile your-profile  # Add to a profile
-```
-
 ### Via npm
 
 ```bash
@@ -35,62 +27,64 @@ Configure the MCP server with environment variables:
 | `NAS_IP` | IP address of your NAS | `10.0.0.50` |
 | `NAS_MOUNT_BASE` | Local directory for NFS mounts | `/mnt/nas` |
 | `NAS_VOLUME_PREFIX` | NAS volume path prefix | `/volume1` |
+| `PORT` | HTTP server port | `3847` |
 
-### Claude Code / Claude Desktop
+## Adding to Claude Code / Claude Desktop
 
-Add to your MCP configuration:
+This MCP server uses Streamable HTTP transport. Add to your MCP settings:
 
 ```json
 {
   "mcpServers": {
     "save-to-nas": {
-      "command": "npx",
-      "args": ["-y", "save-to-nas-mcp"],
-      "env": {
-        "NAS_IP": "192.168.1.100"
-      }
+      "type": "http",
+      "url": "http://localhost:3847/mcp"
     }
   }
 }
 ```
 
-Or if installed globally:
+To run the server:
 
-```json
-{
-  "mcpServers": {
-    "save-to-nas": {
-      "command": "save-to-nas-mcp",
-      "env": {
-        "NAS_IP": "192.168.1.100"
-      }
-    }
-  }
-}
+```bash
+# If installed globally
+NAS_IP=192.168.1.100 save-to-nas-mcp
+
+# Or via npx
+NAS_IP=192.168.1.100 npx save-to-nas-mcp
+
+# Or from source
+NAS_IP=192.168.1.100 npm start
 ```
 
 ## Tools
 
-### `save_to_nas`
+### `nas`
 
-Save a file or folder to a NAS share.
-
-**Parameters:**
-- `source` (required): Path to the local file or folder
-- `share` (required): Name of the NAS share (e.g., "AI_Art", "Documents")
-- `destination_subfolder` (optional): Subfolder within the share
-
-**Example:**
-```
-Save ~/projects/my-data to the Documents share
-```
-
-### `list_nas_shares`
-
-List available NFS shares on the NAS and show which are mounted.
+Unified tool for interacting with your Synology NAS. Supports listing available shares and saving files/folders.
 
 **Parameters:**
-- `filter` (optional): Filter shares by name
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `action` | Yes | `"list"` to show shares, `"save"` to copy files |
+| `source` | For save | Path to local file or folder to save |
+| `share` | For save | Name of the NAS share (e.g., "Documents", "AI_Art") |
+| `destination_subfolder` | No | Subfolder within the share to save to |
+| `filter` | No | Filter shares by name (for list action) |
+
+**Examples:**
+
+```
+List all available NAS shares
+→ action: "list"
+
+Save a folder to the Documents share
+→ action: "save", source: "/home/user/projects/my-data", share: "Documents"
+
+Save to a subfolder
+→ action: "save", source: "./report.pdf", share: "Documents", destination_subfolder: "reports/2024"
+```
 
 ## How It Works
 

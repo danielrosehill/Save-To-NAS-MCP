@@ -2,4 +2,5 @@ context/
 CLAUDE.md
 .git/
 .gitignore
+.claude/
 node_modules/
